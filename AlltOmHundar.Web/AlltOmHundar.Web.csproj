@@ -6,4 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AlltOmHundar.Core\AlltOmHundar.Core.csproj" />
+    <ProjectReference Include="..\AlltOmHundar.Infrastructure\AlltOmHundar.Infrastructure.csproj" />
+    <ProjectReference Include="..\AlltOmHundar.Services\AlltOmHundar.Services.csproj" />
+  </ItemGroup>
+
 </Project>
