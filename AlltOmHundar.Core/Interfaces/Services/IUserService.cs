@@ -1,26 +1,17 @@
-﻿using AlltOmHundar.Core.Interfaces.Repositories;
-using AlltOmHundar.Core.Models;
-using AlltOmHundar.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AlltOmHundar.Core.Models;
 using System.Threading.Tasks;
 
-namespace AlltOmHundar.Infrastructure.Repositories
+namespace AlltOmHundar.Core.Interfaces.Services
 {
-    public class GroupMessageRepository : Repository<GroupMessage>, IGroupMessageRepository
+    public interface IUserService
     {
-        public GroupMessageRepository(ApplicationDbContext context) : base(context)
-        {
-        }
-
-        public async Task<IEnumerable<GroupMessage>> GetMessagesByGroupAsync(int groupId)
-        {
-            return await _dbSet
-                .Include(m => m.Sender)
-                .Where(m => m.GroupId == groupId)
-                .OrderBy(m => m.SentAt)
-                .ToListAsync();
-        }
+        Task<User?> GetUserByIdAsync(int id);
+        Task<User?> GetUserByEmailAsync(string email);
+        Task<User?> GetUserByUsernameAsync(string username);
+        Task<User> RegisterUserAsync(string username, string email, string password);
+        Task<User?> AuthenticateAsync(string email, string password);
+        Task<bool> UpdateProfileAsync(int userId, string? bio, string? profileImageUrl);
+        Task<bool> UsernameExistsAsync(string username);
+        Task<bool> EmailExistsAsync(string email);
     }
 }
