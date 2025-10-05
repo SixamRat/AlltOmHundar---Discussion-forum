@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1>Admin Dashboard</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Kategorier</div>
+            <div class="card-body">
+                <h5 class="card-title">Hantera forumkategorier</h5>
+                <p class="card-text">Skapa, redigera och ta bort kategorier</p>
+                <a asp-action="Categories" class="btn btn-light">Hantera kategorier</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Rapporter</div>
+            <div class="card-body">
+                <h5 class="card-title">@ViewBag.PendingReportsCount väntande rapport(er)</h5>
+                <p class="card-text">Granska och hantera rapporterade inlägg</p>
+                <a asp-action="Reports" class="btn btn-light">Visa rapporter</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Statistik</div>
+            <div class="card-body">
+                <h5 class="card-title">Forumstatistik</h5>
+                <p class="card-text">Se översikt över aktivitet</p>
+                <button class="btn btn-light" disabled>Kommer snart</button>
+            </div>
+        </div>
+    </div>
+</div>

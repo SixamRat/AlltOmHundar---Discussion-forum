@@ -1,0 +1,41 @@
+﻿@model AlltOmHundar.Web.ViewModels.CreateCategoryViewModel
+@{
+    ViewData["Title"] = "Skapa kategori";
+}
+
+<h1>Skapa ny kategori</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="CreateCategory" method="post">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Namn</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Beskrivning</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DisplayOrder" class="form-label">Visningsordning</label>
+                <input asp-for="DisplayOrder" class="form-control" type="number" />
+                <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                <small class="form-text text-muted">Lägre nummer visas först</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Skapa kategori</button>
+            <a asp-action="Categories" class="btn btn-secondary">Avbryt</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
