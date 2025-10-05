@@ -1,0 +1,45 @@
+﻿@model IEnumerable<AlltOmHundar.Core.Models.Topic>
+@{
+    ViewData["Title"] = ViewBag.Category.Name;
+    var category = ViewBag.Category as AlltOmHundar.Core.Models.Category;
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Forum</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@category.Name</li>
+    </ol>
+</nav>
+
+<h1>@category.Name</h1>
+@if (!string.IsNullOrEmpty(category.Description))
+{
+    <p class="lead">@category.Description</p>
+}
+<hr />
+
+@if (Model.Any())
+{
+    <div class="list-group">
+        @foreach (var topic in Model)
+        {
+            <a asp-action="Topic" asp-route-id="@topic.Id" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@topic.Title</h5>
+                    <small>@topic.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                </div>
+                @if (!string.IsNullOrEmpty(topic.Description))
+                {
+                    <p class="mb-1">@topic.Description</p>
+                }
+                <small>@topic.Posts.Count inlägg</small>
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>Inga ämnen i denna kategori ännu.</p>
+    </div>
+}

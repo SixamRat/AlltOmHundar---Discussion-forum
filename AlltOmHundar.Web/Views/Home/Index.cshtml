@@ -1,8 +1,38 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Hem";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Välkommen till Allt Om Hundar! 🐕</h1>
+    <p class="lead">Ett forum för alla hundälskare</p>
+
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Diskutera</h5>
+                    <p class="card-text">Dela med dig av tips och erfarenheter om hundar</p>
+                    <a asp-controller="Forum" asp-action="Index" class="btn btn-primary">Gå till forumet</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gemenskap</h5>
+                    <p class="card-text">Träffa andra hundägare och skapa vänner</p>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-success">Registrera dig</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lär dig</h5>
+                    <p class="card-text">Få råd om träning, vård och hundgodis</p>
+                    <a asp-controller="Forum" asp-action="Index" class="btn btn-info">Utforska</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

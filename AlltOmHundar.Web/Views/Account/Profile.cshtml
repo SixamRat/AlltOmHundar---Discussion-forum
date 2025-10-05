@@ -1,0 +1,43 @@
+﻿@model AlltOmHundar.Core.Models.User
+@{
+    ViewData["Title"] = "Min Profil";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <h2>Min Profil</h2>
+        <hr />
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                        {
+                            <img src="@Model.ProfileImageUrl" alt="Profilbild" class="img-fluid rounded" />
+                        }
+                        else
+                        {
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 200px;">
+                                <h1>@Model.Username.Substring(0, 1).ToUpper()</h1>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <h4>@Model.Username</h4>
+                        <p><strong>E-post:</strong> @Model.Email</p>
+                        <p><strong>Medlem sedan:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd")</p>
+                        <p><strong>Roll:</strong> @Model.Role</p>
+
+                        @if (!string.IsNullOrEmpty(Model.Bio))
+                        {
+                            <hr />
+                            <p><strong>Om mig:</strong></p>
+                            <p>@Model.Bio</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

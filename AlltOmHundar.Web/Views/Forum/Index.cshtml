@@ -1,0 +1,41 @@
+﻿@model IEnumerable<AlltOmHundar.Core.Models.Category>
+@{
+    ViewData["Title"] = "Forum";
+}
+
+<h1>🐕 Hundforum - Kategorier</h1>
+<p class="lead">Välkommen till AlltOmHundar! Välj en kategori för att börja diskutera.</p>
+<hr />
+
+<div class="row">
+    @foreach (var category in Model)
+    {
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a asp-action="Category" asp-route-id="@category.Id" class="text-decoration-none">
+                            @category.Name
+                        </a>
+                    </h5>
+
+                    @if (!string.IsNullOrEmpty(category.Description))
+                    {
+                        <p class="card-text text-muted">@category.Description</p>
+                    }
+
+                    <p class="card-text">
+                        <small class="text-muted">
+                            @category.Topics.Count ämne(n)
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Category" asp-route-id="@category.Id" class="btn btn-sm btn-primary">
+                        Visa ämnen
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
