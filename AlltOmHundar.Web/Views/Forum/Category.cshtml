@@ -1,16 +1,15 @@
 ﻿@model IEnumerable<AlltOmHundar.Core.Models.Topic>
 @{
     var category = ViewBag.Category as AlltOmHundar.Core.Models.Category;
-    
-    if (category == null)
-    {
-        <div class="alert alert-danger">
-            <p>Kategori hittades inte</p>
-        </div>
-        return;
-    }
-    
-    ViewData["Title"] = category.Name;
+    ViewData["Title"] = category?.Name ?? "Kategori";
+}
+
+@if (category == null)
+{
+    <div class="alert alert-danger">
+        <p>Kategori hittades inte</p>
+    </div>
+    return;
 }
 
 <nav aria-label="breadcrumb">
@@ -32,4 +31,23 @@
     <div class="list-group">
         @foreach (var topic in Model)
         {
-            <a asp-action="Topic" asp-route-id="
+            <a asp-action="Topic" asp-route-id="@topic.Id" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@topic.Title</h5>
+                    <small>@topic.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                </div>
+                @if (!string.IsNullOrEmpty(topic.Description))
+                {
+                    <p class="mb-1">@topic.Description</p>
+                }
+                <small>@topic.Posts.Count inlägg</small>
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>Inga ämnen i denna kategori ännu.</p>
+    </div>
+}
