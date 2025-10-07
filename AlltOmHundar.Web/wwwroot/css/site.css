@@ -1,31 +1,33 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 body {
-  margin-bottom: 60px;
+    font-family:'Montserrat', Arlai, sans-serif;
+    color: #272727;
+    background-color: #f8f9fa;
+}
+/*Navigation*/
+.navbar-dark {
+    background-color: #8f0157 !important;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.navbar-brand {
+    font-weight: bold;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/*Knappar*/
+
+.btn-primary {
+    background-color: #8f0157;
+    border-color: #8f0157;
+    border-radius: 25px;
+    font-weight: bold;
+}
+.btn-primary:hover {
+        background-color: #8f0157;
+        opacity: 0.8;
+}
+.btn-outline-primary {
+    background-color: #8f0157;
+    border-color: #8f0157;
+    border-radius: 25px;
+    font-weight: bold;
 }
