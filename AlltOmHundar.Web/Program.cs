@@ -9,7 +9,7 @@ namespace AlltOmHundar.Web
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +27,7 @@ namespace AlltOmHundar.Web
             builder.Services.AddScoped<IPrivateMessageRepository, PrivateMessageRepository>();
             builder.Services.AddScoped<IGroupRepository, GroupRepository>();
             builder.Services.AddScoped<IGroupMessageRepository, GroupMessageRepository>();
+            builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 
             // Register Services
             builder.Services.AddScoped<IUserService, UserService>();
@@ -52,6 +53,23 @@ namespace AlltOmHundar.Web
 
             var app = builder.Build();
 
+            // Seed data (skapa admin-användare)
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    var seeder = new DataSeeder(context);
+                    await seeder.SeedAsync();
+                }
+                catch (Exception ex)
+                {
+                    // Logga eventuella fel
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Ett fel uppstod vid seeding av databasen");
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
