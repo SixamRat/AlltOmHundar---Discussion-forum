@@ -110,7 +110,7 @@ else
                                         <input type="hidden" name="topicId" value="@topic.Id" />
                                         <input type="hidden" name="reactionType" value="@((int)AlltOmHundar.Core.Enums.ReactionType.Love)" />
                                         <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            ❤️ @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Love)")
+                                            ❤️ @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Love)
                                         </button>
                                     </form>
                                     <form asp-controller="Reaction" asp-action="AddReaction" method="post" class="d-inline">
@@ -118,7 +118,8 @@ else
                                         <input type="hidden" name="topicId" value="@topic.Id" />
                                         <input type="hidden" name="reactionType" value="@((int)AlltOmHundar.Core.Enums.ReactionType.Funny)" />
                                         <button type="submit" class="btn btn-sm btn-outline-warning">
-                                            😄 @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Funny)")
+                                            😄 @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Funny)
+                                           
                                         </button>
                                     </form>
                                     
@@ -160,13 +161,18 @@ else
                             </div>
                         }
 
-                        @* Svara på inlägg *@
+                        @* Svara och anmäl*@
                         @if (SessionHelper.IsLoggedIn(Context.Session))
                         {
                             <button class="btn btn-sm btn-outline-primary mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#reply-@post.Id">
                                 Svara
                             </button>
-                            <div class="collapse mt-2" id="reply-@post.Id">
+                            <a asp-controller="Report" asp-action="Create" asp-route-postId="@post.Id" asp-route-topicId="@topic.Id"
+                               class="btn btn-sm btn-outline-danger mt-2 ms-2">
+                                🚩 Anmäl
+                            </a>
+
+                                <div class= "collapse mt-2" id = "reply-@post.Id" >
                                 <form asp-action="CreatePost" asp-controller="Forum" method="post">
                                     <input type="hidden" name="topicId" value="@topic.Id" />
                                     <input type="hidden" name="parentPostId" value="@post.Id" />

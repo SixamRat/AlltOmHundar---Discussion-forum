@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Anmäl inlägg";
+    var post = ViewBag.Post as AlltOmHundar.Core.Models.Post;
+    var topicId = ViewBag.TopicId as int?;
+
+    if (post == null || !topicId.HasValue)
+    {
+        <div class="alert alert-danger">
+            <p>Inlägg hittades inte</p>
+        </div>
+        return;
+    }
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Anmäl inlägg</h2>
+        <p class="text-muted">Anmäl detta inlägg om det bryter mot forumets regler.</p>
+        <hr />
+
+        <div class="card mb-4 bg-light">
+            <div class="card-header">
+                <strong>Inlägg av @post.User.Username</strong>
+                <small class="text-muted">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+            </div>
+            <div class="card-body">
+                <p>@post.Content</p>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post">
+            <input type="hidden" name="postId" value="@post.Id" />
+            <input type="hidden" name="topicId" value="@topicId" />
+
+            <div class="mb-3">
+                <label for="reason" class="form-label">Anledning till anmälan</label>
+                <textarea name="reason" id="reason" class="form-control" rows="4"
+                          placeholder="Beskriv varför du anmäler detta inlägg..." required></textarea>
+                <small class="form-text text-muted">
+                    Vanliga anledningar: Spam, hatfullt språk, hot, olämpligt innehåll
+                </small>
+            </div>
+
+            <button type="submit" class="btn btn-danger">Skicka anmälan</button>
+            <a asp-controller="Forum" asp-action="Topic" asp-route-id="@topicId" class="btn btn-secondary">Avbryt</a>
+        </form>
+    </div>
+</div>
