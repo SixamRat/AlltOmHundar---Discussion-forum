@@ -31,3 +31,50 @@ body {
     border-radius: 25px;
     font-weight: bold;
 }
+.btn-outline-primary:hover {
+        background-color: #8f0157;
+        color: white;
+}
+/*Profilbild*/
+.card {
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.card-header {
+    background-color: #8f0157;
+    color: white;
+    font-weight: bold;
+}
+/*Formulär*/
+.form-control:focus {
+    border-color: #8f0157;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+/*Varningar*/
+.alert-success {
+    background-color: #d4edde;
+    color: #155724;
+}
+.alert-danger {
+    background-color: #f8d7ds;
+    color: #721c24;
+}
+/*Länkar*/
+a {
+    color: #8f0157;
+}
+a:hover {
+    opacity: 0.8;
+}
+/*Tabeller*/
+.table thead th {
+    background-color: rgba(143, 1, 87, 0.1);
+    font-weight: bold;
+}
+/*Footer*/
+.footer {
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
