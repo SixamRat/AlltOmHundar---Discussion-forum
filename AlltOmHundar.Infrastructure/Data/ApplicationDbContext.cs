@@ -185,7 +185,7 @@ namespace AlltOmHundar.Infrastructure.Data
 
             // Seed data - grundläggande kategorier
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Hundsnack", Description = "Allmänt hunprat", DisplayOrder = 1 },
+                new Category { Id = 1, Name = "Hundsnack", Description = "Allmänt hundprat", DisplayOrder = 1 },
                 new Category { Id = 2, Name = "Hundgodissnack", Description = "Allt om hundgodis och belöningar", DisplayOrder = 2 },
                 new Category { Id = 3, Name = "Träningssnack", Description = "Träning och uppfostran", DisplayOrder = 3 },
                 new Category { Id = 4, Name = "Valpsnack", Description = "Allt om valpar", DisplayOrder = 4 }
