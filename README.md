@@ -36,3 +36,5 @@ personer
 ◦ Det ska gå att ge inlägget t ex tummen-upp, hjärta m m, och det ska gå att se hur många som
 t ex gillat inlägget.
 ◦ Fula ord-filter. Om inlägget innehåller opassande ord, så ska dessa ersättas med *********
+
+DISCLAIMER! Jag använde POMPAs hemsida som inspiration när jag skulle göra CSS.
