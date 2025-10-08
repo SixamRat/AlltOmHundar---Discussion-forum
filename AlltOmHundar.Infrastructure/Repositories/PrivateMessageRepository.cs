@@ -48,5 +48,16 @@ namespace AlltOmHundar.Infrastructure.Repositories
             return await _dbSet
                 .CountAsync(m => m.ReceiverId == userId && !m.IsRead);
         }
+
+        public async Task MarkAsReadAsync(int messageId) 
+        {
+            var message = await _dbSet.FindAsync(messageId);
+            if (message != null) 
+            {
+                message.IsRead = true;
+                message.ReadAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -10,5 +10,6 @@ namespace AlltOmHundar.Core.Interfaces.Repositories
         Task<IEnumerable<PrivateMessage>> GetReceivedMessagesAsync(int userId);
         Task<IEnumerable<PrivateMessage>> GetSentMessagesAsync(int userId);
         Task<int> GetUnreadMessageCountAsync(int userId);
+        Task MarkAsReadAsync(int messageId);
     }
 }

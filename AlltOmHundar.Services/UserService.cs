@@ -17,7 +17,10 @@ namespace AlltOmHundar.Services
         {
             _userRepository = userRepository;
         }
-
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _userRepository.GetAllAsync();
+        }
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await _userRepository.GetByEmailAsync(email);
