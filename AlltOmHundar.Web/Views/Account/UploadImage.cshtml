@@ -1,0 +1,35 @@
+@model AlltOmHundar.Web.ViewModels.ProfileImage
+@{
+ViewData["Title"] = "Ladda upp profilbild";
+
+}
+<div class="row justify-content-center">
+	<div class="col-md-6">
+		<h2>Profilbild</h2>
+
+		@if (!string.IsNullOrEmpty(ViewBag.CurrentImage as string))
+        {
+            <div class="text-center mb-4">
+                <p>Nuvarande:</p>
+                <img src="@ViewBag.CurrentImage" alt="Profil" class="img-thumbnail" style="max-width: 200px;" />
+            </div>
+        }
+
+        <form asp-action="UploadImage" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Välj bild</label>
+                <input asp-for="Image" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="Image" class="text-danger"></span>
+                <small class="text-muted">Max 5MB. jpg, png eller gif</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Ladda upp</button>
+            <a asp-action="Profile" class="btn btn-secondary">Avbryt</a>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

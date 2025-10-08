@@ -128,9 +128,48 @@ namespace AlltOmHundar.Web.Controllers
 
             if (user == null)
                 return NotFound();
+
             // Kontrolerar filtyp och storlek
             var ext = Path.GetExtension(model.Image.FileName).ToLower();
-            if (ext != ".jpg" && ext !=)
+            if (ext != ".jpg" && ext != ".jpeg")
+            {
+                ModelState.AddModelError("Image", "Ladda upp en bild av filtypen .jpg eller .jpeg");
+                return View(model);
+            }
+            if (model.Image.Length > 5 * 1024 * 1024) 
+            {
+                ModelState.AddModelError("Image", "Filtyp för stor, bilden får max vara 5MB");
+                return View(model);
+            }
+
+            //Spara bild
+
+            var fileName = $"{userId}_{Guid.NewGuid()}{ext}";
+            var path = Path.Combine("wwwroot", "images", "profiles", fileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await model.Image.CopyToAsync(stream);
+            }
+
+            // Radera bild
+
+            if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+            {
+                var oldPath = Path.Combine("wwwroot", user.ProfileImageUrl.TrimStart('/'));
+                if (System.IO.File.Exists(oldPath))
+                    System.IO.File.Delete(oldPath);
+
+            }
+
+            //Uppdaterar ändringen
+            user.ProfileImageUrl = $"/images/profiles/{fileName}";
+            await _userService.UpdateUserAsync(user);
+
+            TempData["SuccessMessage"] = "Profilbild ändrad";
+            return RedirectToAction("Profile");
+
         }
+           
     }
 }
