@@ -23,4 +23,8 @@
     <ProjectReference Include="..\AlltOmHundar.Services\AlltOmHundar.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\profiles\" />
+  </ItemGroup>
+
 </Project>

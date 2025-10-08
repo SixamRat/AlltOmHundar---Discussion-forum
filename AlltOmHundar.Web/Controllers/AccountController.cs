@@ -100,5 +100,37 @@ namespace AlltOmHundar.Web.Controllers
 
             return View(user);
         }
+        //Funktion för att lägga till profilbild
+        [HttpGet]
+        public async Task<IActionResult> UploadImage()
+        {
+            var userId = SessionHelper.GetUserId(HttpContext.Session);
+            if (!userId.HasValue)
+                return RedirectToAction("Login");
+
+            var user = await _userService.GetUserByIdAsync(userId.Value);
+            ViewBag.CurrentImage = user?.ProfileImageUrl;
+            
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadImage(ProfileImage model)
+        {
+            var userId = SessionHelper.GetUserId(HttpContext.Session);
+            if (!userId.HasValue)
+                return RedirectToAction("Login");
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userService.GetUserByIdAsync(userId.Value);
+
+            if (user == null)
+                return NotFound();
+            // Kontrolerar filtyp och storlek
+            var ext = Path.GetExtension(model.Image.FileName).ToLower();
+            if (ext != ".jpg" && ext !=)
+        }
     }
 }
