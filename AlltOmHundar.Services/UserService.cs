@@ -19,7 +19,8 @@ namespace AlltOmHundar.Services
         }
         public async Task<List<User>> GetAllUsersAsync()
         {
-            return await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllAsync();
+            return users.ToList();
         }
         public async Task<User?> GetUserByEmailAsync(string email)
         {

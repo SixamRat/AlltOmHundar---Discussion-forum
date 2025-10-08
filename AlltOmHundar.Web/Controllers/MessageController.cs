@@ -1,6 +1,8 @@
 ﻿using AlltOmHundar.Core.Interfaces.Services;
+using AlltOmHundar.Core.Models;
 using AlltOmHundar.Web.Helpers;
 using AlltOmHundar.Web.ViewModels;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,10 +11,10 @@ namespace AlltOmHundar.Web.Controllers
 {
     public class MessageController : Controller
     {
-        private readonly IMessageService _messageService;
+        private readonly IPrivateMessageService _messageService;
         private readonly IUserService _userService;
 
-        public MessageController(IMessageService messageService, IUserService userService)
+        public MessageController(IPrivateMessageService messageService, IUserService userService)
         {
             _messageService = messageService;
             _userService = userService;

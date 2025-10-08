@@ -1,0 +1,52 @@
+﻿@model AlltOmHundar.Core.Models.PrivateMessage
+@{
+    ViewData["Title"] = "Meddelande";
+    var userId = Context.Session.GetInt32("UserId");
+    var isSender = Model.SenderId == userId;
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group">
+            <a asp-action="Inbox" class="list-group-item list-group-item-action">
+                📥 Inkorg
+            </a>
+            <a asp-action="Sent" class="list-group-item list-group-item-action">
+                📤 Skickat
+            </a>
+            <a asp-action="Send" class="list-group-item list-group-item-action">
+                ✉️ Nytt meddelande
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>@(isSender ? "Till" : "Från"):</strong>
+                        @(isSender? Model.Receiver.Username : Model.Sender.Username)
+                    </div>
+                    <small class="text-muted">
+                        @Model.SentAt.ToString("yyyy-MM-dd HH:mm")
+                    </small>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>@Model.Content</p>
+            </div>
+            <div class="card-footer">
+                @if (!isSender)
+                {
+                    <a asp-action="Send" asp-route-receiverId="@Model.SenderId" class="btn btn-primary">
+                        Svara
+                    </a>
+                }
+                <a asp-action="@(isSender ? "Sent" : "Inbox")" class="btn btn-secondary">
+                    Tillbaka
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

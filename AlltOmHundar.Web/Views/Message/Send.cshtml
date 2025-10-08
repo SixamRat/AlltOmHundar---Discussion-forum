@@ -1,0 +1,57 @@
+﻿@model AlltOmHundar.Web.ViewModels.SendMessage
+@{
+    ViewData["Title"] = "Nytt meddelande";
+    var users = ViewBag.Users as List<AlltOmHundar.Core.Models.User>;
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group">
+            <a asp-action="Inbox" class="list-group-item list-group-item-action">
+                📥 Inkorg
+            </a>
+            <a asp-action="Sent" class="list-group-item list-group-item-action">
+                📤 Skickat
+            </a>
+            <a asp-action="Send" class="list-group-item list-group-item-action active">
+                ✉️ Nytt meddelande
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <h2>Nytt meddelande</h2>
+
+        <form asp-action="Send" method="post">
+            <div class="mb-3">
+                <label asp-for="ReceiverId" class="form-label">Till</label>
+                <select asp-for="ReceiverId" class="form-select">
+                    <option value="">Välj mottagare</option>
+                    @if (users != null)
+                    {
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.Id">@user.Username</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="ReceiverId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label">Meddelande</label>
+                <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Skicka</button>
+            <a asp-action="Inbox" class="btn btn-secondary">Avbryt</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

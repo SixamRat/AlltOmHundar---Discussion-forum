@@ -7,9 +7,10 @@ namespace AlltOmHundar.Core.Interfaces.Services
     public interface IPrivateMessageService
     {
         Task<PrivateMessage> SendMessageAsync(int senderId, int receiverId, string content);
-        Task<IEnumerable<PrivateMessage>> GetConversationAsync(int user1Id, int user2Id);
-        Task<IEnumerable<PrivateMessage>> GetReceivedMessagesAsync(int userId);
+        Task<List<PrivateMessage>> GetSentMessagesAsync(int userId);
+        Task<List<PrivateMessage>> GetReceivedMessagesAsync(int userId);
+        Task<PrivateMessage?> GetMessageByIdAsync(int id);
+        Task MarkAsReadAsync(int messageId);
         Task<int> GetUnreadCountAsync(int userId);
-        Task<bool> MarkAsReadAsync(int messageId, int userId);
     }
 }

@@ -10,7 +10,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">   66
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     🐕 Allt Om Hundar
@@ -27,7 +27,14 @@
                         <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Forum" asp-action="Index">Forum</a>
                         </li>
-                        
+
+                        @if (SessionHelper.IsLoggedIn(Context.Session))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" asp-controller="Message" asp-action="Inbox">💬 Meddelanden</a>
+                            </li>
+                        }
+
                         @if (SessionHelper.IsAdmin(Context.Session))
                         {
                             <li class="nav-item">

@@ -3,6 +3,7 @@ using AlltOmHundar.Core.Interfaces.Services;
 using AlltOmHundar.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AlltOmHundar.Services
@@ -31,14 +32,20 @@ namespace AlltOmHundar.Services
             return message;
         }
 
-        public async Task<IEnumerable<PrivateMessage>> GetConversationAsync(int user1Id, int user2Id)
+        public async Task<List<PrivateMessage>> GetSentMessagesAsync(int userId)
         {
-            return await _messageRepository.GetMessagesBetweenUsersAsync(user1Id, user2Id);
+            var messages = await _messageRepository.GetSentMessagesAsync(userId);
+            return messages.ToList();
+        }
+        public async Task<List<PrivateMessage>> GetReceivedMessagesAsync(int userId)
+        {
+            var messages = await _messageRepository.GetReceivedMessagesAsync(userId);
+            return messages.ToList();
         }
 
-        public async Task<IEnumerable<PrivateMessage>> GetReceivedMessagesAsync(int userId)
+        public async Task<PrivateMessage?> GetMessageByIdAsync(int id)
         {
-            return await _messageRepository.GetReceivedMessagesAsync(userId);
+            return await _messageRepository.GetByIdAsync(id);
         }
 
         public async Task<int> GetUnreadCountAsync(int userId)
@@ -46,17 +53,14 @@ namespace AlltOmHundar.Services
             return await _messageRepository.GetUnreadMessageCountAsync(userId);
         }
 
-        public async Task<bool> MarkAsReadAsync(int messageId, int userId)
+        public async Task MarkAsReadAsync(int messageId)
         {
-            var message = await _messageRepository.GetByIdAsync(messageId);
-            if (message == null || message.ReceiverId != userId)
-                return false;
+            await _messageRepository.MarkAsReadAsync(messageId);
 
-            message.IsRead = true;
-            message.ReadAt = DateTime.UtcNow;
-
-            await _messageRepository.UpdateAsync(message);
-            return true;
+        }
+        public async Task<IEnumerable<PrivateMessage>> GetConversationAsync(int user1Id, int user2Id)
+        {
+            return await _messageRepository.GetMessagesBetweenUsersAsync(user1Id, user2Id);
         }
     }
 }

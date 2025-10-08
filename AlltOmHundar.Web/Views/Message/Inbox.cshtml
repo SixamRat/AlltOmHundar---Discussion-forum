@@ -1,0 +1,50 @@
+﻿@model List<AlltOmHundar.Core.Models.PrivateMessage>
+@{
+    ViewData["Title"] = "Inkorg";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group">
+            <a asp-action="Inbox" class="list-group-item list-group-item-action active">
+                📥 Inkorg
+            </a>
+            <a asp-action="Sent" class="list-group-item list-group-item-action">
+                📤 Skickat
+            </a>
+            <a asp-action="Send" class="list-group-item list-group-item-action">
+                ✉️ Nytt meddelande
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <h2>Inkorg</h2>
+
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                Inga meddelanden ännu.
+            </div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var message in Model)
+                {
+                    <a asp-action="View" asp-route-id="@message.Id" class="list-group-item list-group-item-action @(message.IsRead ? "" : "fw-bold")">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@message.Sender.Username</h5>
+                            <small>@message.SentAt.ToString("yyyy-MM-dd HH:mm")</small>
+                        </div>
+                        <p class="mb-1">@(message.Content.Length > 100 ? message.Content.Substring(0, 100) + "..." : message.Content)</p>
+                        @if (!message.IsRead)
+                        {
+                            <span class="badge bg-primary">Nytt</span>
+                        }
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
