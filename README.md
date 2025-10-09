@@ -38,3 +38,7 @@ t ex gillat inlägget.
 ◦ Fula ord-filter. Om inlägget innehåller opassande ord, så ska dessa ersättas med *********
 
 DISCLAIMER! Jag använde POMPAs hemsida som inspiration när jag skulle göra CSS.
+
+
+
+https://alltomhundar-b0ctaxe7d6e5hegv.swedencentral-01.azurewebsites.net
