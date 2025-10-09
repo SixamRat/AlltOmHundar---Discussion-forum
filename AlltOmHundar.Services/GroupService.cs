@@ -146,8 +146,12 @@ namespace AlltOmHundar.Services
             await _groupRepository.SaveAsync();
         }
 
-        public Task<IEnumerable<GroupInvitation>> GetUserInvitationsAsync(int userId)
-            => _groupRepository.GetInvitesForUserAsync(userId);
+        
+        public async Task<IEnumerable<GroupInvitation>> GetUserInvitationsAsync(int userId)
+        {
+            var list = await _groupRepository.GetInvitesForUserAsync(userId); 
+            return list; 
+        }
 
     }
 }

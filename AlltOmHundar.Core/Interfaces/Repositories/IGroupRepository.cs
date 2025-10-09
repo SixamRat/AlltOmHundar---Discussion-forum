@@ -1,9 +1,9 @@
-﻿using AlltOmHundar.Core.Interfaces.Repositories;
+﻿// IGroupRepository.cs (SLUTLIG VERSION)
+using AlltOmHundar.Core.Interfaces.Repositories;
 using AlltOmHundar.Core.Models;
 
 public interface IGroupRepository : IRepository<Group>
 {
-    // Grupper & medlemmar
     Task<IEnumerable<Group>> GetUserGroupsAsync(int userId);
     Task<Group?> GetGroupWithMembersAsync(int groupId);
     Task<bool> IsUserMemberAsync(int groupId, int userId);

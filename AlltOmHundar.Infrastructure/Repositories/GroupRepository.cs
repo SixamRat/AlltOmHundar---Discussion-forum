@@ -13,9 +13,8 @@ namespace AlltOmHundar.Infrastructure.Repositories
     {
         public GroupRepository(ApplicationDbContext context) : base(context) { }
 
-        
+        // ===== Grupper & medlemmar =====
 
-        // Lista grupper där användaren är medlem
         public async Task<IEnumerable<Group>> GetUserGroupsAsync(int userId)
         {
             return await _dbSet
@@ -24,7 +23,6 @@ namespace AlltOmHundar.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        // Hämta grupp med medlemmar + skapare
         public async Task<Group?> GetGroupWithMembersAsync(int groupId)
         {
             return await _dbSet
@@ -32,41 +30,33 @@ namespace AlltOmHundar.Infrastructure.Repositories
                 .Include(g => g.CreatedByUser)
                 .FirstOrDefaultAsync(g => g.Id == groupId);
         }
-        public async Task<bool> IsUserMemberAsync(int groupId, int userId)
+
+        public Task<bool> IsUserMemberAsync(int groupId, int userId)
         {
-            return await _context.GroupMembers
-                .AnyAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
+            return _context.GroupMembers.AnyAsync(m => m.GroupId == groupId && m.UserId == userId);
         }
+
+        // Ägare = admin 
         public async Task<bool> IsAdminOrOwnerAsync(int groupId, int userId)
         {
             var grp = await _dbSet.AsNoTracking().FirstOrDefaultAsync(g => g.Id == groupId);
-            if (grp is null) return false;
-            if (grp.CreatedByUserId == userId) return true;
-
-            return await _context.GroupMembers
-                .AnyAsync(m => m.GroupId == groupId && m.UserId == userId && m.IsAdmin);
+            return grp != null && grp.CreatedByUserId == userId;
         }
 
-        // Lägg till medlem
-        public async Task AddMemberAsync(int groupId, int userId, bool isAdmin = false)
+        public async Task AddMemberAsync(int groupId, int userId, bool isAdmin = false) 
         {
-            var exists = await _context.GroupMembers
-                .AnyAsync(m => m.GroupId == groupId && m.UserId == userId);
+            var exists = await _context.GroupMembers.AnyAsync(m => m.GroupId == groupId && m.UserId == userId);
+            if (exists) return;
 
-            if (!exists)
+            _context.GroupMembers.Add(new GroupMember
             {
-                _context.GroupMembers.Add(new GroupMember
-                {
-                    GroupId = groupId,
-                    UserId = userId,
-                    IsAdmin = isAdmin,
-                    JoinedAt = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
-            }
+                GroupId = groupId,
+                UserId = userId,
+                JoinedAt = DateTime.UtcNow 
+            });
+            await _context.SaveChangesAsync();
         }
 
-        // Ta bort medlem
         public async Task RemoveMemberAsync(int groupId, int targetUserId)
         {
             var member = await _context.GroupMembers
@@ -77,6 +67,9 @@ namespace AlltOmHundar.Infrastructure.Repositories
             _context.GroupMembers.Remove(member);
             await _context.SaveChangesAsync();
         }
+
+        // ===== Inbjudningar =====
+
         public async Task<GroupInvitation> UpsertInviteAsync(int groupId, int invitedUserId, int invitedByUserId)
         {
             var inv = await _context.GroupInvitations
@@ -89,14 +82,14 @@ namespace AlltOmHundar.Infrastructure.Repositories
                     GroupId = groupId,
                     InvitedUserId = invitedUserId,
                     InvitedByUserId = invitedByUserId,
-                    Status = "Pending",
+                    Status = "Inväntar godkännande",
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.GroupInvitations.Add(inv);
             }
             else
             {
-                inv.Status = "Pending";
+                inv.Status = "Inväntar godkännande";
             }
 
             await _context.SaveChangesAsync();
@@ -115,30 +108,15 @@ namespace AlltOmHundar.Infrastructure.Repositories
         public async Task<IReadOnlyList<GroupInvitation>> GetInvitesForUserAsync(int userId)
         {
             var list = await _context.GroupInvitations
-                .Where(i => i.InvitedUserId == userId && i.Status == "Pending")
+                .Where(i => i.InvitedUserId == userId && i.Status == "Inväntar godkännande")
                 .Include(i => i.Group)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
 
             return list;
         }
-        public async Task<GroupMessage> AddMessageAsync(GroupMessage msg)
-        {
-            _context.GroupMessages.Add(msg);
-            await _context.SaveChangesAsync();
-            return msg;
-        }
 
-        public async Task<IReadOnlyList<GroupMessage>> GetMessagesAsync(int groupId)
-        {
-            var list = await _context.GroupMessages
-                .Where(m => m.GroupId == groupId)
-                .Include(m => m.Sender)
-                .OrderBy(m => m.CreatedAt)
-                .ToListAsync();
-
-            return list;
-        }
+        // ===== Save =====
         public Task SaveAsync() => _context.SaveChangesAsync();
     }
 }

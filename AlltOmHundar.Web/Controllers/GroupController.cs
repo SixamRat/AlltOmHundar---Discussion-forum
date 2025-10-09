@@ -28,10 +28,8 @@ namespace AlltOmHundar.Web.Controllers
         {
             var me = CurrentUserId();
             if (me is null) return Unauthorized();
-
-            var groups = await _groups.GetMyGroupsAsync(me.Value);
-            var invites = await _groups.GetMyInvitesAsync(me.Value);
-            return View((groups, invites));
+            var groups = await _groups.GetUserGroupsAsync(me.Value);
+            return View(groups);
         }
 
         [HttpPost]
@@ -40,65 +38,26 @@ namespace AlltOmHundar.Web.Controllers
         {
             var me = CurrentUserId();
             if (me is null) return Unauthorized();
-            if (string.IsNullOrWhiteSpace(name)) { ModelState.AddModelError("", "Ange gruppnamn."); return RedirectToAction(nameof(My)); }
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                TempData["Error"] = "Ange ett gruppnamn.";
+                return RedirectToAction(nameof(My));
+            }
 
-            await _groups.CreateGroupAsync(me.Value, name.Trim(), description?.Trim());
+            await _groups.CreateGroupAsync(name: name, description: string.IsNullOrWhiteSpace(description) ? null : description, createdByUserId: me.Value);
             return RedirectToAction(nameof(My));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Invite(int groupId, int userId)
-        {
-            var me = CurrentUserId();
-            if (me is null) return Unauthorized();
-
-            await _groups.InviteAsync(groupId, userId, me.Value);
-            return RedirectToAction(nameof(My));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Accept(int invitationId)
-        {
-            var me = CurrentUserId();
-            if (me is null) return Unauthorized();
-
-            await _groups.AcceptInviteAsync(invitationId, me.Value);
-            return RedirectToAction(nameof(My));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Decline(int invitationId)
-        {
-            var me = CurrentUserId();
-            if (me is null) return Unauthorized();
-
-            await _groups.DeclineInviteAsync(invitationId, me.Value);
-            return RedirectToAction(nameof(My));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveMember(int groupId, int targetUserId)
-        {
-            var me = CurrentUserId();
-            if (me is null) return Unauthorized();
-
-            await _groups.RemoveMemberAsync(groupId, targetUserId, me.Value);
-            return RedirectToAction(nameof(Read), new { id = groupId });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Read(int id) // id = groupId
+        public async Task<IActionResult> Read(int id)
         {
             var me = CurrentUserId();
             if (me is null) return Unauthorized();
-
-            var msgs = await _groups.GetMessagesAsync(id, me.Value);
+            var isMember = await _groups.IsUserMemberAsync(id, me.Value);
+            if (!isMember) return Forbid();
+            var messages = await _groups.GetGroupMessagesAsync(id);
             ViewBag.GroupId = id;
-            return View(msgs);
+            return View(messages);
         }
 
         [HttpPost]
@@ -107,7 +66,35 @@ namespace AlltOmHundar.Web.Controllers
         {
             var me = CurrentUserId();
             if (me is null) return Unauthorized();
-            await _groups.SendMessageAsync(groupId, me.Value, content);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                TempData["Error"] = "Meddelandet kan inte vara tomt.";
+                return RedirectToAction(nameof(Read), new { id = groupId });
+            }
+
+            await _groups.SendGroupMessageAsync(groupId, me.Value, content);
+            return RedirectToAction(nameof(Read), new { id = groupId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddMember(int groupId, int userId)
+        {
+            var me = CurrentUserId();
+            if (me is null) return Unauthorized();
+            var ok = await _groups.AddMemberAsync(groupId, userId, me.Value);
+            if (!ok) TempData["Error"] = "Du saknar behörighet eller användaren är redan medlem.";
+            return RedirectToAction(nameof(Read), new { id = groupId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveMember(int groupId, int userId)
+        {
+            var me = CurrentUserId();
+            if (me is null) return Unauthorized();
+            var ok = await _groups.RemoveMemberAsync(groupId, userId, me.Value);
+            if (!ok) TempData["Error"] = "Du saknar behörighet eller medlemmen finns inte.";
             return RedirectToAction(nameof(Read), new { id = groupId });
         }
     }
