@@ -1,0 +1,69 @@
+﻿@model IEnumerable<AlltOmHundar.Core.Models.Group>
+@{
+    ViewData["Title"] = "Mina grupper";
+    var invites = ViewBag.Invites as IEnumerable<AlltOmHundar.Core.Models.GroupInvitation>;
+}
+
+<h2>Mina grupper</h2>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+@if (TempData["SuccessMessage"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<form asp-action="Create" method="post" class="mb-3">
+    @Html.AntiForgeryToken()
+    <div class="row g-2">
+        <div class="col-md-4"><input name="name" class="form-control" placeholder="Gruppnamn" required /></div>
+        <div class="col-md-5"><input name="description" class="form-control" placeholder="Beskrivning (valfritt)" /></div>
+        <div class="col-md-3"><button class="btn btn-primary w-100">Skapa grupp</button></div>
+    </div>
+</form>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <h5>Grupper</h5>
+        <ul class="list-group">
+            @foreach (var g in Model ?? Enumerable.Empty<AlltOmHundar.Core.Models.Group>())
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@g.Name</span>
+                    <a class="btn btn-sm btn-outline-primary" asp-action="Read" asp-route-id="@g.Id">Öppna</a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="col-md-6">
+        <h5>Inbjudningar</h5>
+        <ul class="list-group">
+            @if (invites == null || !invites.Any())
+            {
+                <li class="list-group-item text-muted">Inga inbjudningar just nu.</li>
+            }
+            else
+            {
+                foreach (var i in invites)
+                {
+                    <li class="list-group-item d-flex align-items-center gap-2">
+                        <span>@i.Group.Name</span>
+                        <form asp-action="Accept" method="post" class="ms-auto">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="invitationId" value="@i.Id" />
+                            <button class="btn btn-sm btn-primary">Acceptera</button>
+                        </form>
+                        <form asp-action="Decline" method="post" class="ms-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="invitationId" value="@i.Id" />
+                            <button class="btn btn-sm btn-outline-secondary">Tack nej</button>
+                        </form>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+</div>

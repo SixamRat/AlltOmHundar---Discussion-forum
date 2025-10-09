@@ -27,6 +27,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-light" asp-area="" asp-controller="Forum" asp-action="Index">Forum</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-controller="Group" asp-action="My">Grupper</a>
+                        </li>
 
                         @if (SessionHelper.IsLoggedIn(Context.Session))
                         {
@@ -75,6 +78,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @* Flash-meddelanden *@
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -89,6 +93,22 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
+
+            
+            @{
+                var ctrl = Convert.ToString(ViewContext.RouteData.Values["controller"]);
+                var act = Convert.ToString(ViewContext.RouteData.Values["action"]);
+                var isForumIndex = string.Equals(ctrl, "Forum", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(act, "Index", StringComparison.OrdinalIgnoreCase);
+            }
+            @if (isForumIndex)
+            {
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <a class="btn btn-primary" asp-controller="Group" asp-action="My">Öppna grupper</a>
+                    <a class="btn btn-outline-primary" asp-controller="Group" asp-action="My">Skapa grupp</a>
+                </div>
+            }
+
             @RenderBody()
         </main>
     </div>

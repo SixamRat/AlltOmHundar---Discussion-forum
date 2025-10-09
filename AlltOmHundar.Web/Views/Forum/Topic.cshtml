@@ -1,197 +1,49 @@
 ﻿@model IEnumerable<AlltOmHundar.Core.Models.Post>
-@using AlltOmHundar.Web.Helpers
+
 @{
-    var topic = ViewBag.Topic as AlltOmHundar.Core.Models.Topic;
-    var userId = ViewBag.UserId as int?;
-    ViewData["Title"] = topic?.Title ?? "Ämne";
+    ViewData["Title"] = "Tråd";
+    var topic = ViewBag.Topic;
 }
 
-@if (topic == null)
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">@topic?.Title</h3>
+    <a class="btn btn-success"
+       asp-controller="Post" asp-action="CreatePost"
+       asp-route-topicId="@topic.Id">
+        Nytt inlägg (med bild)
+    </a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(topic?.Description))
 {
-    <div class="alert alert-danger">
-        <p>Ämne hittades inte</p>
-    </div>
-    return;
+    <p class="text-muted">@topic.Description</p>
 }
 
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a asp-action="Index">Forum</a></li>
-        <li class="breadcrumb-item"><a asp-action="Category" asp-route-id="@topic.CategoryId">@topic.Category.Name</a></li>
-        <li class="breadcrumb-item active" aria-current="page">@topic.Title</li>
-    </ol>
-</nav>
-
-<h1>@topic.Title</h1>
-@if (!string.IsNullOrEmpty(topic.Description))
+@if (TempData["SuccessMessage"] is string ok)
 {
-    <p class="lead">@topic.Description</p>
+    <div class="alert alert-success">@ok</div>
 }
-<hr />
-
-@* Formulär för nytt inlägg *@
-@if (SessionHelper.IsLoggedIn(Context.Session))
+@if (TempData["ErrorMessage"] is string err)
 {
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Skapa nytt inlägg</h5>
-        </div>
+    <div class="alert alert-danger">@err</div>
+}
+
+@foreach (var post in Model ?? Enumerable.Empty<AlltOmHundar.Core.Models.Post>())
+{
+    <div class="card mb-3">
         <div class="card-body">
-            <form asp-action="CreatePost" method="post">
-                <input type="hidden" name="topicId" value="@topic.Id" />
-                <div class="mb-3">
-                    <textarea name="content" class="form-control" rows="4" placeholder="Skriv ditt inlägg här..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Skicka inlägg</button>
-            </form>
-        </div>
-    </div>
-}
-else
-{
-    <div class="alert alert-warning">
-        <p>Du måste <a asp-controller="Account" asp-action="Login">logga in</a> för att skapa inlägg.</p>
-    </div>
-}
-
-@* Visa inlägg *@
-@if (Model.Any())
-{
-    <h3>Inlägg</h3>
-    @foreach (var post in Model)
-    {
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-2 text-center border-end">
-                        @if (!string.IsNullOrEmpty(post.User.ProfileImageUrl))
-                        {
-                            <img src="@post.User.ProfileImageUrl" alt="@post.User.Username" class="img-fluid rounded-circle mb-2" style="max-width: 80px;" />
-                        }
-                        else
-                        {
-                            <div class="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 80px; height: 80px;">
-                                <h3 class="mb-0">@post.User.Username.Substring(0, 1).ToUpper()</h3>
-                            </div>
-                        }
-                        <p class="mb-0"><strong>@post.User.Username</strong></p>
-                        <small class="text-muted">Medlem</small>
-                    </div>
-                    <div class="col-md-10">
-                        <div class="d-flex justify-content-between mb-2">
-                            <small class="text-muted">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
-                            @if (post.UpdatedAt.HasValue)
-                            {
-                                <small class="text-muted">(Redigerad: @post.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm"))</small>
-                            }
-                        </div>
-                        <p>@post.Content</p>
-
-                        @if (!string.IsNullOrEmpty(post.ImageUrl))
-                        {
-                            <img src="@post.ImageUrl" alt="Inläggsbild" class="img-fluid mb-2" style="max-width: 400px;" />
-                        }
-                        @* Reactions*@
-
-                        <div class="mt- 3 mb- 3">
-                            @if (SessionHelper.IsLoggedIn(Context.Session))
-                            {
-                                <div class="btn-group" role="group">
-                                    <form asp-controller="Reaction" asp-action="AddReaction" method="post" class="d-inline">
-                                        <input type="hidden" name="postId" value="@post.Id" />
-                                        <input type="hidden" name="topicId" value="@topic.Id" />
-                                        <input type="hidden" name="reactionType" value="@((int)AlltOmHundar.Core.Enums.ReactionType.Like)" />
-                                        <button type="submit" class="btn btn-sm btn-outline-primary">
-                                            👍 @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Like)
-                                        </button>
-                                    </form>
-                                    <form asp-controller="Reaction" asp-action="AddReaction" method="post" class="d-inline">
-                                        <input type="hidden" name="postId" value="@post.Id" />
-                                        <input type="hidden" name="topicId" value="@topic.Id" />
-                                        <input type="hidden" name="reactionType" value="@((int)AlltOmHundar.Core.Enums.ReactionType.Love)" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            ❤️ @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Love)
-                                        </button>
-                                    </form>
-                                    <form asp-controller="Reaction" asp-action="AddReaction" method="post" class="d-inline">
-                                        <input type="hidden" name="postId" value="@post.Id" />
-                                        <input type="hidden" name="topicId" value="@topic.Id" />
-                                        <input type="hidden" name="reactionType" value="@((int)AlltOmHundar.Core.Enums.ReactionType.Funny)" />
-                                        <button type="submit" class="btn btn-sm btn-outline-warning">
-                                            😄 @post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Funny)
-                                           
-                                        </button>
-                                    </form>
-                                    
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="text-muted">
-                                    <span class="badge bg-secondary me-2">👍@post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Like)</span>
-                                    <span class="badge bg-danger me-2">❤️@post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Love)</span>
-                                    <span class="badge bg-warning me-2">😄@post.Reactions.Count(r => r.ReactionType == AlltOmHundar.Core.Enums.ReactionType.Funny)</span>
-                                </div>
-                            }
-                            
-                            @if (post.Replies.Any())
-                            {
-                                <span class="badge bg-info ms-2">
-                                    💬 @post.Replies.Count svar
-                                </span>
-                            }
-                        </div>
-
-                        @* Visa svar (replies) *@
-                        @if (post.Replies.Any())
-                        {
-                            <div class="mt-3 ms-4 border-start border-3 ps-3">
-                                @foreach (var reply in post.Replies.OrderBy(r => r.CreatedAt))
-                                {
-                                    <div class="card mb-2">
-                                        <div class="card-body py-2">
-                                            <div class="d-flex justify-content-between">
-                                                <small><strong>@reply.User.Username</strong></small>
-                                                <small class="text-muted">@reply.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
-                                            </div>
-                                            <p class="mb-0 mt-1">@reply.Content</p>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-
-                        @* Svara och anmäl*@
-                        @if (SessionHelper.IsLoggedIn(Context.Session))
-                        {
-                            <button class="btn btn-sm btn-outline-primary mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#reply-@post.Id">
-                                Svara
-                            </button>
-                            <a asp-controller="Report" asp-action="Create" asp-route-postId="@post.Id" asp-route-topicId="@topic.Id"
-                               class="btn btn-sm btn-outline-danger mt-2 ms-2">
-                                🚩 Anmäl
-                            </a>
-
-                                <div class= "collapse mt-2" id = "reply-@post.Id" >
-                                <form asp-action="CreatePost" asp-controller="Forum" method="post">
-                                    <input type="hidden" name="topicId" value="@topic.Id" />
-                                    <input type="hidden" name="parentPostId" value="@post.Id" />
-                                    <div class="input-group">
-                                        <textarea name="content" class="form-control" rows="2" placeholder="Skriv ditt svar..." required></textarea>
-                                        <button type="submit" class="btn btn-primary">Skicka</button>
-                                    </div>
-                                </form>
-                            </div>
-                        }
-                    </div>
-                </div>
+            <div class="small text-muted">
+                @post.CreatedAt.ToLocalTime():g — @post.User?.Username
             </div>
+            <div class="mt-2">@post.Content</div>
+
+            @if (!string.IsNullOrEmpty(post.ImageUrl))
+            {
+                <div class="mt-2">
+                    <img src="@post.ImageUrl" alt="Postbild" class="img-fluid rounded"
+                         style="max-height:380px;object-fit:contain;" />
+                </div>
+            }
         </div>
-    }
-}
-else
-{
-    <div class="alert alert-info">
-        <p>Här var det tomt! Var den första att skriva!</p>
     </div>
 }

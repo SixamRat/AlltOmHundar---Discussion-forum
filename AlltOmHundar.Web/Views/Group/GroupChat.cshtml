@@ -1,0 +1,59 @@
+﻿@model IEnumerable<AlltOmHundar.Core.Models.GroupMessage>
+@using System.Linq
+@{
+    ViewData["Title"] = "Gruppchatt";
+
+    int groupId =
+        ViewBag.GroupId is int gv ? gv :
+        (int.TryParse(Convert.ToString(ViewContext.RouteData.Values["id"]), out var rid) ? rid : 0);
+}
+
+<h2>Gruppchatt</h2>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+@if (TempData["SuccessMessage"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<form asp-action="Invite" method="post" class="mb-3 d-flex gap-2">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="groupId" value="@groupId" />
+    <input name="userId" class="form-control" placeholder="Användar-ID att bjuda in" required />
+    <button class="btn btn-outline-primary">Bjud in</button>
+</form>
+
+<div class="card mb-3">
+    <div class="card-body" style="max-height:60vh; overflow:auto;">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-muted">Inga meddelanden ännu.</div>
+        }
+        else
+        {
+            foreach (var m in Model)
+            {
+                <div class="mb-3">
+                    <div class="small text-muted">
+                        @m.SentAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm") — @m.Sender?.Username
+                    </div>
+                    <div>@m.Content</div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<form asp-action="Send" method="post" class="d-flex gap-2">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="groupId" value="@groupId" />
+    <input name="content" class="form-control" placeholder="Skriv meddelande..." required />
+    <button class="btn btn-primary">Skicka</button>
+</form>
+
+<div class="mt-3">
+    <a class="btn btn-secondary" asp-action="My">Tillbaka till Mina grupper</a>
+</div>

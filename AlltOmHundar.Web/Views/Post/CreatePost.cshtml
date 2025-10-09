@@ -1,0 +1,43 @@
+﻿@model AlltOmHundar.Web.ViewModels.CreatePost
+@{
+    ViewData["Title"] = "Skapa inlägg";
+    var topicId = ViewBag.TopicId ?? Context.Request.Query["topicId"];
+}
+
+<h2>Skapa inlägg</h2>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+@if (TempData["SuccessMessage"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<form asp-action="CreatePost" asp-route-topicId="@topicId" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label">Innehåll</label>
+        <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Image" class="form-label">Bild (valfritt)</label>
+        <input asp-for="Image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+        <span asp-validation-for="Image" class="text-danger"></span>
+        <small class="text-muted">Valfritt. Max 5MB. jpg, jpeg, png, gif eller webp.</small>
+    </div>
+
+    <input type="hidden" asp-for="ParentPostId" />
+
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-primary">Skapa inlägg</button>
+    <a asp-controller="Topic" asp-action="Details" asp-route-id="@topicId" class="btn btn-secondary">Avbryt</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

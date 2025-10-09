@@ -1,7 +1,9 @@
-﻿using AlltOmHundar.Core.Interfaces.Services;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using AlltOmHundar.Core.Interfaces.Services;
+using AlltOmHundar.Core.Models;
 using AlltOmHundar.Web.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace AlltOmHundar.Web.Controllers
 {
@@ -21,56 +23,69 @@ namespace AlltOmHundar.Web.Controllers
             _postService = postService;
         }
 
-        // Visa alla kategorier
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var categories = await _categoryService.GetCategoriesWithTopicsAsync();
-            return View(categories);
+            var safeCategories = (categories ?? Enumerable.Empty<Category>()).ToList();
+
+            var allTopics = safeCategories
+                .SelectMany(c => c.Topics ?? Enumerable.Empty<Topic>())
+                .Select(t => new { Id = t.Id, Title = t.Title })
+                .ToList();
+
+            ViewBag.AllTopics = allTopics;
+            return View("/Views/Forum/Index.cshtml", safeCategories);
         }
 
-        // Visa ämnen i en kategori
+        [HttpGet]
         public async Task<IActionResult> Category(int id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
-            if (category == null)
-                return NotFound();
+            if (category == null) return NotFound();
 
             var topics = await _topicService.GetTopicsByCategoryAsync(id);
             ViewBag.Category = category;
-            return View(topics);
+
+            return View("/Views/Forum/Category.cshtml", topics);
         }
 
-        // Visa inlägg i ett ämne
+        [HttpGet]
         public async Task<IActionResult> Topic(int id)
         {
             var topic = await _topicService.GetTopicWithPostsAsync(id);
-            if (topic == null)
-                return NotFound();
+            if (topic == null) return NotFound();
 
             var posts = await _postService.GetTopLevelPostsByTopicAsync(id);
             ViewBag.Topic = topic;
             ViewBag.UserId = SessionHelper.GetUserId(HttpContext.Session);
-            return View(posts);
+
+            return View("/Views/Forum/Topic.cshtml", posts);
         }
 
-        // Skapa nytt inlägg
+        [HttpGet]
+        public IActionResult NewPost(int topicId, int? parentPostId)
+        {
+            return RedirectToAction("CreatePost", "Post", new { topicId, parentPostId });
+        }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreatePost(int topicId, string content, int? parentPostId)
         {
             var userId = SessionHelper.GetUserId(HttpContext.Session);
-            if (!userId.HasValue)
-                return RedirectToAction("Login", "Account");
+            if (!userId.HasValue) return RedirectToAction("Login", "Account");
 
             if (string.IsNullOrWhiteSpace(content))
             {
                 TempData["ErrorMessage"] = "Innehåll krävs";
-                return RedirectToAction("Topic", new { id = topicId });
+                return RedirectToAction(nameof(Topic), new { id = topicId });
             }
 
-            await _postService.CreatePostAsync(topicId, userId.Value, content, null, parentPostId);
+            await _postService.CreatePostAsync(topicId, userId.Value, content, parentPostId, imageUrl: null);
 
             TempData["SuccessMessage"] = "Inlägg skapat!";
-            return RedirectToAction("Topic", new { id = topicId });
+            return RedirectToAction(nameof(Topic), new { id = topicId });
         }
     }
 }

@@ -47,23 +47,22 @@ namespace AlltOmHundar.Services
             return await _postRepository.GetPostsByUserAsync(userId);
         }
 
-        public async Task<Post> CreatePostAsync(int topicId, int userId, string content, string? imageUrl, int? parentPostId = null)
+        public async Task<Post> CreatePostAsync(int topicId, int userId, string content, int? parentPostId = null, string? imageUrl = null)
         {
-            // Filtrera svordomar
-            var filteredContent = FilterProfanity(content);
+            // Filtrera profanity
+            content = FilterProfanity(content);
 
             var post = new Post
             {
                 TopicId = topicId,
                 UserId = userId,
-                Content = filteredContent,
-                ImageUrl = imageUrl,
+                Content = content,
                 ParentPostId = parentPostId,
+                ImageUrl = imageUrl,  // Lägg till denna rad!
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _postRepository.AddAsync(post);
-            return post;
+            return await _postRepository.AddAsync(post);
         }
 
         public async Task<bool> UpdatePostAsync(int postId, int userId, string content)

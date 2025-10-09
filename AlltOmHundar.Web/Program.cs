@@ -1,9 +1,15 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using AlltOmHundar.Core.Interfaces.Repositories;
 using AlltOmHundar.Core.Interfaces.Services;
+using AlltOmHundar.Infrastructure.Data;
 using AlltOmHundar.Infrastructure.Repositories;
 using AlltOmHundar.Services;
-using AlltOmHundar.Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 
 namespace AlltOmHundar.Web
 {
@@ -13,11 +19,11 @@ namespace AlltOmHundar.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add DbContext
+            // DbContext
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Register Repositories
+            // Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ITopicRepository, TopicRepository>();
@@ -29,7 +35,7 @@ namespace AlltOmHundar.Web
             builder.Services.AddScoped<IGroupMessageRepository, GroupMessageRepository>();
             builder.Services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
 
-            // Register Services
+            // Services
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ITopicService, TopicService>();
@@ -39,10 +45,10 @@ namespace AlltOmHundar.Web
             builder.Services.AddScoped<IPrivateMessageService, PrivateMessageService>();
             builder.Services.AddScoped<IGroupService, GroupService>();
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddHttpContextAccessor();
 
-            // Add Session
+            // Session
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -51,9 +57,21 @@ namespace AlltOmHundar.Web
                 options.Cookie.IsEssential = true;
             });
 
+            // Auth (cookies) – krävs för [Authorize]
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.AccessDeniedPath = "/Account/Login";
+                    options.SlidingExpiration = true;
+                    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.IsEssential = true;
+                });
+
             var app = builder.Build();
 
-            // Seed data (skapa admin-användare)
+            // Seed
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -65,13 +83,11 @@ namespace AlltOmHundar.Web
                 }
                 catch (Exception ex)
                 {
-                    // Logga eventuella fel
                     var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "Ett fel uppstod vid seeding av databasen");
                 }
             }
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -81,21 +97,32 @@ namespace AlltOmHundar.Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            
+            var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "App_Data", "uploads");
+            Directory.CreateDirectory(uploadsPath);
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(uploadsPath),
+                RequestPath = "/uploads"
+            });
+
             app.UseRouting();
 
             app.UseSession();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
+            // Automigrera
             using (var scope = app.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<AlltOmHundar.Infrastructure.Data.ApplicationDbContext>();
-                db.Database.Migrate(); 
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate();
             }
+
             app.Run();
         }
     }

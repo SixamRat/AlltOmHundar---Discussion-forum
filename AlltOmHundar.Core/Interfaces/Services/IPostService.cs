@@ -11,7 +11,7 @@ namespace AlltOmHundar.Core.Interfaces.Services
         Task<IEnumerable<Post>> GetPostsByTopicAsync(int topicId);
         Task<IEnumerable<Post>> GetTopLevelPostsByTopicAsync(int topicId);
         Task<IEnumerable<Post>> GetPostsByUserAsync(int userId);
-        Task<Post> CreatePostAsync(int topicId, int userId, string content, string? imageUrl, int? parentPostId = null);
+        Task<Post> CreatePostAsync(int topicId, int userId, string content, int? parentPostId = null, string? imageUrl = null);
         Task<bool> UpdatePostAsync(int postId, int userId, string content);
         Task<bool> DeletePostAsync(int postId, int userId);
         string FilterProfanity(string content);
