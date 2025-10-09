@@ -10,35 +10,46 @@
 
         <div class="card">
             <div class="card-body">
-                <div class="row mb-3">
+                <div class="row align-items-start g-3">
+                    
                     <div class="col-md-4">
-                        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
-                        {
-                            <img src="@Model.ProfileImageUrl" alt="Profilbild" class="img-fluid rounded" />
-                        }
-                        else
-                        {
-                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 200px;">
-                                <h1>@Model.Username.Substring(0, 1).ToUpper()</h1>
-                            </div>
-                        }
+                        <div class="text-center">
+                            @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                            {
+                                <img src="@Model.ProfileImageUrl"
+                                     alt="Profilbild för @Model.Username"
+                                     class="img-fluid rounded mb-3"
+                                     style="max-width: 220px; height: auto;" />
+                            }
+                            else
+                            {
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded mb-3"
+                                     style="width: 220px; height: 220px;">
+                                    <h1 class="m-0">
+                                        @((!string.IsNullOrEmpty(Model?.Username) ? Model.Username[0].ToString().ToUpper() : "?"))
+                                    </h1>
+                                </div>
+                            }
+
+                            <a asp-action="UploadImage"
+                               class="btn btn-primary w-100">
+                                Ändra profilbild
+                            </a>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <a asp-action="UploadImage" class="btn btn-outline-primary">
-                           Ändra profilbild
-                        </a>
-                    </div>
+
+                    
                     <div class="col-md-8">
-                        <h4>@Model.Username</h4>
-                        <p><strong>E-post:</strong> @Model.Email</p>
-                        <p><strong>Medlem sedan:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd")</p>
-                        <p><strong>Roll:</strong> @Model.Role</p>
+                        <h4 class="mb-2">@Model.Username</h4>
+                        <p class="mb-1"><strong>E-post:</strong> @Model.Email</p>
+                        <p class="mb-1"><strong>Medlem sedan:</strong> @Model.CreatedAt.ToString("yyyy-MM-dd")</p>
+                        <p class="mb-3"><strong>Roll:</strong> @Model.Role</p>
 
                         @if (!string.IsNullOrEmpty(Model.Bio))
                         {
                             <hr />
-                            <p><strong>Om mig:</strong></p>
-                            <p>@Model.Bio</p>
+                            <p class="mb-1"><strong>Om mig:</strong></p>
+                            <p class="mb-0">@Model.Bio</p>
                         }
                     </div>
                 </div>

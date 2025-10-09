@@ -2,7 +2,7 @@
 body {
     font-family:'Montserrat', Arlai, sans-serif;
     color: #272727;
-    background-color: #f8f9fa;
+    background-color: #faf9fb;
 }
 /*Navigation*/
 .navbar-dark {
@@ -15,6 +15,10 @@ body {
 
 /*Knappar*/
 
+.btn {
+    border-radius: 25px;
+    font-weight: bold;
+}
 .btn-primary {
     background-color: #8f0157;
     border-color: #8f0157;
@@ -28,6 +32,7 @@ body {
 .btn-outline-primary {
     background-color: #8f0157;
     border-color: #8f0157;
+    color: white;
     border-radius: 25px;
     font-weight: bold;
 }
@@ -56,7 +61,7 @@ body {
     color: #155724;
 }
 .alert-danger {
-    background-color: #f8d7ds;
+    background-color: #721c24;
     color: #721c24;
 }
 /*Länkar*/
@@ -77,4 +82,31 @@ a:hover {
     border-top: 1px solid #e0e0e0;
     padding: 2rem 0;
     margin-top: 3rem;
+}
+
+ /* === HOME PAGE === */
+.row.mt-5 .card {
+    height: 100%;
+    min-height: 145px;
+}
+
+.row.mt-5 .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.row.mt-5 .card-title {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.row.mt-5 .card-text {
+    flex: 1;
+    margin-bottom: var(--space-md);
+}
+
+.row.mt-5 .btn {
+    width: 100%;
 }
