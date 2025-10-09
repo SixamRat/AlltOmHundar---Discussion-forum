@@ -80,9 +80,14 @@ namespace AlltOmHundar.Web.Controllers
 
             var model = new SendMessage();
             if (receiverId.HasValue)
+            {
                 model.ReceiverId = receiverId.Value;
+                var receiver = await _userService.GetUserByIdAsync(receiverId.Value);
+                ViewBag.ReceiverName = receiver?.Username;
+            }
+                
 
-            // Hämta alla användare för dropdown (utom nuvarande användare)
+            // Hämta alla användare för dropdown - lista(utom nuvarande användare)
             var allUsers = await _userService.GetAllUsersAsync();
             ViewBag.Users = allUsers.Where(u => u.Id != userId.Value).ToList();
 

@@ -25,6 +25,13 @@
         <form asp-action="Send" method="post">
             <div class="mb-3">
                 <label asp-for="ReceiverId" class="form-label">Till</label>
+                @if (ViewBag.ReceiverName != null)
+                {
+                    <p class="form-control-plaintext"><strong>@ViewBag.ReceiverName</strong></p>
+                    <input type="hidden" asp-for="ReceiverId"/>
+                }
+                else
+                {
                 <select asp-for="ReceiverId" class="form-select">
                     <option value="">Välj mottagare</option>
                     @if (users != null)
@@ -36,6 +43,7 @@
                     }
                 </select>
                 <span asp-validation-for="ReceiverId" class="text-danger"></span>
+                }
             </div>
 
             <div class="mb-3">
