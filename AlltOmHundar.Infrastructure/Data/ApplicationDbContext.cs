@@ -10,7 +10,7 @@ namespace AlltOmHundar.Infrastructure.Data
         {
         }
 
-        // DbSets - representerar tabeller i databasen
+        
         public DbSet<User> Users { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Topic> Topics { get; set; }
@@ -21,6 +21,7 @@ namespace AlltOmHundar.Infrastructure.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<GroupMember> GroupMembers { get; set; }
         public DbSet<GroupMessage> GroupMessages { get; set; }
+        public DbSet<GroupInvitation> GroupInvitations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,6 +80,9 @@ namespace AlltOmHundar.Infrastructure.Data
                     .WithMany(p => p.Replies)
                     .HasForeignKey(e => e.ParentPostId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(e => new { e.TopicId, e.CreatedAt });
+                entity.HasIndex(e => e.ParentPostId);
             });
 
             // Reaction konfiguration
@@ -133,6 +137,32 @@ namespace AlltOmHundar.Infrastructure.Data
                     .HasForeignKey(e => e.ReceiverId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // GroupInvitation konfiguration
+            modelBuilder.Entity<GroupInvitation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(20); 
+
+                
+                entity.HasIndex(e => new { e.GroupId, e.InvitedUserId }).IsUnique();
+
+                entity.HasOne(e => e.Group)
+                    .WithMany(g => g.Invitations)         
+                    .HasForeignKey(e => e.GroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.InvitedUser)
+                    .WithMany(u => u.GroupInvitations)    
+                    .HasForeignKey(e => e.InvitedUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.InvitedByUser)
+                    .WithMany()                           
+                    .HasForeignKey(e => e.InvitedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
 
             // Group konfiguration
             modelBuilder.Entity<Group>(entity =>

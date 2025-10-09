@@ -91,6 +91,11 @@ namespace AlltOmHundar.Web
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AlltOmHundar.Infrastructure.Data.ApplicationDbContext>();
+                db.Database.Migrate(); 
+            }
             app.Run();
         }
     }

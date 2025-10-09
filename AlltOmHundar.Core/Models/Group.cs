@@ -15,5 +15,6 @@ namespace AlltOmHundar.Core.Models
         public User CreatedByUser { get; set; } = null!;
         public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
         public ICollection<GroupMessage> Messages { get; set; } = new List<GroupMessage>();
+        public ICollection<GroupInvitation> Invitations { get; set; } = new List<GroupInvitation>();
     }
 }

@@ -15,5 +15,10 @@ namespace AlltOmHundar.Core.Interfaces.Services
         Task<bool> IsUserMemberAsync(int groupId, int userId);
         Task<GroupMessage> SendGroupMessageAsync(int groupId, int senderId, string content);
         Task<IEnumerable<GroupMessage>> GetGroupMessagesAsync(int groupId);
+        Task InviteAsync(int groupId, int invitedUserId, int invitedByUserId);
+        Task AcceptInviteAsync(int invitationId, int userId);
+        Task DeclineInviteAsync(int invitationId, int userId);
+        Task<IEnumerable<GroupInvitation>> GetUserInvitationsAsync(int userId);
+
     }
 }

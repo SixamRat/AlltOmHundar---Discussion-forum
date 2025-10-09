@@ -26,5 +26,6 @@ namespace AlltOmHundar.Core.Models
         public ICollection<PrivateMessage> ReceivedMessages { get; set; } = new List<PrivateMessage>();
         public ICollection<GroupMember> GroupMemberships { get; set; } = new List<GroupMember>();
         public ICollection<Group> CreatedGroups { get; set; } = new List<Group>();
+        public ICollection<GroupInvitation> GroupInvitations { get; set; } = new List<GroupInvitation>();
     }
 }

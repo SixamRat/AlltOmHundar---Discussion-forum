@@ -24,28 +24,24 @@ namespace AlltOmHundar.Services
             _groupMessageRepository = groupMessageRepository;
             _context = context;
         }
-
+        
         public async Task<Group> CreateGroupAsync(string name, string? description, int createdByUserId)
         {
+            //  Skapa grupp
             var group = new Group
             {
-                Name = name,
-                Description = description,
+                Name = name?.Trim() ?? string.Empty,
+                Description = string.IsNullOrWhiteSpace(description) ? null : description!.Trim(),
                 CreatedByUserId = createdByUserId,
                 CreatedAt = DateTime.UtcNow
             };
 
             await _groupRepository.AddAsync(group);
+            
+            await _groupRepository.SaveAsync();
 
-            // Lägg till skaparen som medlem
-            var member = new GroupMember
-            {
-                GroupId = group.Id,
-                UserId = createdByUserId,
-                JoinedAt = DateTime.UtcNow
-            };
-            _context.GroupMembers.Add(member);
-            await _context.SaveChangesAsync();
+            // Lägg till skaparen blir medlem och auto admin
+            await _groupRepository.AddMemberAsync(group.Id, createdByUserId, isAdmin: true);
 
             return group;
         }
@@ -68,47 +64,25 @@ namespace AlltOmHundar.Services
         public async Task<bool> AddMemberAsync(int groupId, int userId, int requestedByUserId)
         {
             var group = await _groupRepository.GetByIdAsync(groupId);
-            if (group == null)
+            if (group == null) return false;
+
+            // Tillåt ägare/admin
+            if (!await _groupRepository.IsAdminOrOwnerAsync(groupId, requestedByUserId))
                 return false;
 
-            // Kolla att den som lägger till är skaparen
-            if (group.CreatedByUserId != requestedByUserId)
-                return false;
-
-            // Kolla att användaren inte redan är medlem
             if (await _groupRepository.IsUserMemberAsync(groupId, userId))
                 return false;
 
-            var member = new GroupMember
-            {
-                GroupId = groupId,
-                UserId = userId,
-                JoinedAt = DateTime.UtcNow
-            };
-
-            _context.GroupMembers.Add(member);
-            await _context.SaveChangesAsync();
+            await _groupRepository.AddMemberAsync(groupId, userId);
             return true;
         }
 
         public async Task<bool> RemoveMemberAsync(int groupId, int userId, int requestedByUserId)
         {
-            var group = await _groupRepository.GetByIdAsync(groupId);
-            if (group == null)
+            if (!await _groupRepository.IsAdminOrOwnerAsync(groupId, requestedByUserId))
                 return false;
 
-            // Kolla att den som tar bort är skaparen
-            if (group.CreatedByUserId != requestedByUserId)
-                return false;
-
-            var member = await _context.GroupMembers
-                .FirstOrDefaultAsync(gm => gm.GroupId == groupId && gm.UserId == userId);
-
-            if (member == null)
-                return false;
-
-            _context.GroupMembers.Remove(member);
-            await _context.SaveChangesAsync();
+            await _groupRepository.RemoveMemberAsync(groupId, userId);
             return true;
         }
 
@@ -121,7 +95,7 @@ namespace AlltOmHundar.Services
         {
             // Kolla att användaren är medlem
             if (!await _groupRepository.IsUserMemberAsync(groupId, senderId))
-                throw new InvalidOperationException("User is not a member of this group");
+                throw new InvalidOperationException("Inte medlem ännu");
 
             var message = new GroupMessage
             {
@@ -139,5 +113,41 @@ namespace AlltOmHundar.Services
         {
             return await _groupMessageRepository.GetMessagesByGroupAsync(groupId);
         }
+
+        public async Task InviteAsync(int groupId, int invitedUserId, int invitedByUserId)
+        {
+            // Endast ägare/admin får bjuda in
+            if (!await _groupRepository.IsAdminOrOwnerAsync(groupId, invitedByUserId))
+                throw new UnauthorizedAccessException("Endast ägare/admin kan bjuda in.");
+
+            await _groupRepository.UpsertInviteAsync(groupId, invitedUserId, invitedByUserId);
+        }
+
+        public async Task AcceptInviteAsync(int invitationId, int userId)
+        {
+            var inv = await _groupRepository.GetInviteAsync(invitationId)
+                      ?? throw new KeyNotFoundException("Inbjudan hittades inte.");
+            if (inv.InvitedUserId != userId) throw new UnauthorizedAccessException();
+
+            inv.Status = "Accepted";
+            await _groupRepository.SaveAsync();
+
+            if (!await _groupRepository.IsUserMemberAsync(inv.GroupId, userId))
+                await _groupRepository.AddMemberAsync(inv.GroupId, userId);
+        }
+
+        public async Task DeclineInviteAsync(int invitationId, int userId)
+        {
+            var inv = await _groupRepository.GetInviteAsync(invitationId)
+                      ?? throw new KeyNotFoundException("Inbjudan hittades inte.");
+            if (inv.InvitedUserId != userId) throw new UnauthorizedAccessException();
+
+            inv.Status = "Declined";
+            await _groupRepository.SaveAsync();
+        }
+
+        public Task<IEnumerable<GroupInvitation>> GetUserInvitationsAsync(int userId)
+            => _groupRepository.GetInvitesForUserAsync(userId);
+
     }
 }
