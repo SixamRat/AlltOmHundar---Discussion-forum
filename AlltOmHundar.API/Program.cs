@@ -4,6 +4,7 @@ using AlltOmHundar.Infrastructure.Data;
 using AlltOmHundar.Infrastructure.Repositories;
 using AlltOmHundar.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,16 +29,32 @@ builder.Services.AddScoped<IReactionService, ReactionService>();
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Add CORS för att tillåta Web-projektet att anropa API:et
+// Swagger configuration
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "AlltOmHundar API",
+        Version = "v1",
+        Description = "API för AlltOmHundar",
+        Contact = new OpenApiContact
+        {
+            Name = "Ditt Namn",
+            Email = "email@doman.com",
+            Url = new Uri("https://www.dindoman.com")
+        }
+    });
+});
+
+// Add CORS for allowing all origins
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.AllowAnyOrigin()        
+              .AllowAnyMethod()       
+              .AllowAnyHeader();       
     });
 });
 
@@ -46,16 +63,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(); 
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "AlltOmHundar API V1"); 
+        options.RoutePrefix = string.Empty; 
+    });
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection();  
+app.UseCors("AllowAll");    
+app.UseAuthorization();     
+app.MapControllers();       
 
-app.UseCors("AllowAll");
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+app.Run();  
