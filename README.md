@@ -1,3 +1,5 @@
+I created a discussion forum as a school assignment, I decided to make it around dogs.
+
 DETTA ÄR ETT INLÄMNINGSPROJEKT 
 KRAV
 ◦ MVC, eller Blazor
@@ -41,4 +43,5 @@ DISCLAIMER! Jag använde POMPAs hemsida som inspiration när jag skulle göra CS
 
 
 
-https://alltomhundar-b0ctaxe7d6e5hegv.swedencentral-01.azurewebsites.net
+Länk till API - https://alltomhundar-b0ctaxe7d6e5hegv.swedencentral-01.azurewebsites.net
+
