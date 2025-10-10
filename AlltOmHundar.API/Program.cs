@@ -37,12 +37,11 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "AlltOmHundar API",
         Version = "v1",
-        Description = "API för AlltOmHundar",
+        Description = "API för AlltOmHundar forum",
         Contact = new OpenApiContact
         {
-            Name = "Ditt Namn",
-            Email = "email@doman.com",
-            Url = new Uri("https://www.dindoman.com")
+            Name = "AlltOmHundar",
+            Email = "info@alltomhundar.se"
         }
     });
 });
@@ -52,28 +51,33 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()        
-              .AllowAnyMethod()       
-              .AllowAnyHeader();       
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Automigrera databasen
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger(); 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "AlltOmHundar API V1"); 
-        options.RoutePrefix = string.Empty; 
-    });
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
 }
 
-app.UseHttpsRedirection();  
-app.UseCors("AllowAll");    
-app.UseAuthorization();     
-app.MapControllers();       
+// Configure the HTTP request pipeline.
 
-app.Run();  
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "AlltOmHundar API V1");
+    options.RoutePrefix = string.Empty; // Swagger på root URL
+});
+
+app.UseHttpsRedirection();
+app.UseCors("AllowAll");
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
