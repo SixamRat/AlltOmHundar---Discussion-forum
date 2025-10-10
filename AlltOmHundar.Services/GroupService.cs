@@ -5,6 +5,7 @@ using AlltOmHundar.Core.Models;
 using AlltOmHundar.Infrastructure.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace AlltOmHundar.Services
@@ -24,10 +25,18 @@ namespace AlltOmHundar.Services
             _groupMessageRepository = groupMessageRepository;
             _context = context;
         }
-        
+
         public async Task<Group> CreateGroupAsync(string name, string? description, int createdByUserId)
         {
-            //  Skapa grupp
+            // KOLLA OM NAMNET REDAN FINNS
+            var existingGroup = await _context.Groups
+                .FirstOrDefaultAsync(g => g.Name.ToLower() == name.ToLower());
+
+            if (existingGroup != null)
+            {
+                throw new InvalidOperationException("En grupp med detta namn finns redan. Välj ett annat namn.");
+            }
+
             var group = new Group
             {
                 Name = name?.Trim() ?? string.Empty,
@@ -37,13 +46,39 @@ namespace AlltOmHundar.Services
             };
 
             await _groupRepository.AddAsync(group);
-            
             await _groupRepository.SaveAsync();
 
-            // Lägg till skaparen blir medlem och auto admin
+            // Lägg till skaparen som medlem
             await _groupRepository.AddMemberAsync(group.Id, createdByUserId, isAdmin: true);
 
             return group;
+        }
+
+        // NY METOD: Hämta alla grupper
+        public async Task<IEnumerable<Group>> GetAllGroupsAsync()
+        {
+            return await _context.Groups
+                .Include(g => g.Members)
+                .OrderByDescending(g => g.CreatedAt)
+                .ToListAsync();
+        }
+
+        
+        public async Task<bool> DeleteGroupAsync(int groupId, int userId)
+        {
+            var group = await _groupRepository.GetByIdAsync(groupId);
+
+            if (group == null)
+                return false;
+
+            
+            if (group.CreatedByUserId != userId)
+                throw new UnauthorizedAccessException("Endast gruppens ägare kan radera gruppen.");
+
+            
+            await _groupRepository.DeleteAsync(group);
+
+            return true;
         }
 
         public async Task<Group?> GetGroupByIdAsync(int id)
@@ -66,7 +101,6 @@ namespace AlltOmHundar.Services
             var group = await _groupRepository.GetByIdAsync(groupId);
             if (group == null) return false;
 
-            // Tillåt ägare/admin
             if (!await _groupRepository.IsAdminOrOwnerAsync(groupId, requestedByUserId))
                 return false;
 
@@ -93,7 +127,6 @@ namespace AlltOmHundar.Services
 
         public async Task<GroupMessage> SendGroupMessageAsync(int groupId, int senderId, string content)
         {
-            // Kolla att användaren är medlem
             if (!await _groupRepository.IsUserMemberAsync(groupId, senderId))
                 throw new InvalidOperationException("Inte medlem ännu");
 
@@ -116,7 +149,6 @@ namespace AlltOmHundar.Services
 
         public async Task InviteAsync(int groupId, int invitedUserId, int invitedByUserId)
         {
-            // Endast ägare/admin får bjuda in
             if (!await _groupRepository.IsAdminOrOwnerAsync(groupId, invitedByUserId))
                 throw new UnauthorizedAccessException("Endast ägare/admin kan bjuda in.");
 
@@ -146,12 +178,10 @@ namespace AlltOmHundar.Services
             await _groupRepository.SaveAsync();
         }
 
-        
         public async Task<IEnumerable<GroupInvitation>> GetUserInvitationsAsync(int userId)
         {
-            var list = await _groupRepository.GetInvitesForUserAsync(userId); 
-            return list; 
+            var list = await _groupRepository.GetInvitesForUserAsync(userId);
+            return list;
         }
-
     }
 }

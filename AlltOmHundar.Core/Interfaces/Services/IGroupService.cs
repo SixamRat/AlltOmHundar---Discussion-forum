@@ -10,6 +10,8 @@ namespace AlltOmHundar.Core.Interfaces.Services
         Task<Group?> GetGroupByIdAsync(int id);
         Task<Group?> GetGroupWithMembersAsync(int id);
         Task<IEnumerable<Group>> GetUserGroupsAsync(int userId);
+        Task<IEnumerable<Group>> GetAllGroupsAsync();  // <-- NY!
+        Task<bool> DeleteGroupAsync(int groupId, int userId);  // <-- NY!
         Task<bool> AddMemberAsync(int groupId, int userId, int requestedByUserId);
         Task<bool> RemoveMemberAsync(int groupId, int userId, int requestedByUserId);
         Task<bool> IsUserMemberAsync(int groupId, int userId);
@@ -19,6 +21,5 @@ namespace AlltOmHundar.Core.Interfaces.Services
         Task AcceptInviteAsync(int invitationId, int userId);
         Task DeclineInviteAsync(int invitationId, int userId);
         Task<IEnumerable<GroupInvitation>> GetUserInvitationsAsync(int userId);
-
     }
 }

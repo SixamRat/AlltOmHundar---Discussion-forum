@@ -101,7 +101,7 @@ namespace AlltOmHundar.Infrastructure.Repositories
             return await _context.GroupInvitations
                 .Include(i => i.Group)
                 .Include(i => i.InvitedUser)
-                .Include(i => i.InvitedByUser)
+                .Include(i => i.InvitedByUser)  // <-- DENNA måste finnas!
                 .FirstOrDefaultAsync(i => i.Id == invitationId);
         }
 
@@ -110,6 +110,8 @@ namespace AlltOmHundar.Infrastructure.Repositories
             var list = await _context.GroupInvitations
                 .Where(i => i.InvitedUserId == userId && i.Status == "Inväntar godkännande")
                 .Include(i => i.Group)
+                .Include(i => i.InvitedUser)
+                .Include(i => i.InvitedByUser) 
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
 

@@ -4,32 +4,11 @@
 
 @{
     ViewData["Title"] = "Forum";
-
     var safeCategories = (Model ?? Enumerable.Empty<Category>()).ToList();
-    var allTopics = safeCategories
-        .SelectMany(c => c.Topics ?? Enumerable.Empty<Topic>())
-        .Select(t => new { t.Id, t.Title })
-        .ToList();
 }
 
 <h1>🐕 Hundforum - Kategorier</h1>
 <p class="lead">Välkommen till Allt Om Hundar! Välj en kategori för att börja diskutera.</p>
-
-<div class="d-flex flex-wrap gap-2 mb-3">
-    <a class="btn btn-primary" asp-controller="Group" asp-action="My">Öppna grupper</a>
-    <a class="btn btn-outline-primary" asp-controller="Group" asp-action="My">Skapa grupp</a>
-
-    <form method="get" asp-controller="Post" asp-action="CreatePost" class="d-flex gap-2 ms-auto">
-        <select name="topicId" class="form-select" required style="min-width:240px;">
-            <option value="">Välj ämne…</option>
-            @foreach (var t in allTopics)
-            {
-                <option value="@t.Id">@t.Title</option>
-            }
-        </select>
-        <button type="submit" class="btn btn-success">Nytt inlägg</button>
-    </form>
-</div>
 
 <hr />
 

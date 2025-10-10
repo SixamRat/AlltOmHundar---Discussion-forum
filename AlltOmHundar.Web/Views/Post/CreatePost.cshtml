@@ -1,41 +1,34 @@
 ﻿@model AlltOmHundar.Web.ViewModels.CreatePost
 @{
-    ViewData["Title"] = "Skapa inlägg";
-    var topicId = ViewBag.TopicId ?? Context.Request.Query["topicId"];
+    ViewData["Title"] = Model.ParentPostId.HasValue ? "Svara på inlägg" : "Skapa inlägg";
+    var topicId = ViewBag.TopicId;
 }
 
-<h2>Skapa inlägg</h2>
-
-@if (TempData["Error"] is string err)
-{
-    <div class="alert alert-danger">@err</div>
-}
-@if (TempData["SuccessMessage"] is string ok)
-{
-    <div class="alert alert-success">@ok</div>
-}
+<h2>@ViewData["Title"]</h2>
 
 <form asp-action="CreatePost" asp-route-topicId="@topicId" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="mb-3">
-        <label asp-for="Content" class="form-label">Innehåll</label>
-        <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+        <label asp-for="Content" class="form-label">Ditt inlägg</label>
+        <textarea asp-for="Content" class="form-control" rows="6" placeholder="Skriv här..."></textarea>
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="Image" class="form-label">Bild (valfritt)</label>
-        <input asp-for="Image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif,.webp" />
+        <input asp-for="Image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.gif" />
         <span asp-validation-for="Image" class="text-danger"></span>
-        <small class="text-muted">Valfritt. Max 5MB. jpg, jpeg, png, gif eller webp.</small>
+        <small class="text-muted">Max 5MB. jpg, png eller gif</small>
     </div>
 
     <input type="hidden" asp-for="ParentPostId" />
 
-    @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-primary">Skapa inlägg</button>
-    <a asp-controller="Topic" asp-action="Details" asp-route-id="@topicId" class="btn btn-secondary">Avbryt</a>
+    <button type="submit" class="btn btn-primary">
+        @(Model.ParentPostId.HasValue ? "Skicka svar" : "Skapa inlägg")
+    </button>
+    <a asp-controller="Forum" asp-action="Topic" asp-route-id="@topicId" class="btn btn-secondary">Avbryt</a>
 </form>
 
 @section Scripts {

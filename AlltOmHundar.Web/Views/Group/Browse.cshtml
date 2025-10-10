@@ -1,0 +1,62 @@
+﻿@model IEnumerable<AlltOmHundar.Core.Models.Group>
+@{
+    ViewData["Title"] = "Upptäck grupper";
+    var userGroupIds = ViewBag.UserGroupIds as HashSet<int>;
+}
+
+<h2>Upptäck grupper</h2>
+<p class="text-muted">Gå med i grupper som intresserar dig!</p>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+@if (TempData["SuccessMessage"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<div class="mb-3">
+    <a asp-action="My" class="btn btn-secondary">Tillbaka till Mina grupper</a>
+</div>
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var group in Model)
+        {
+            var isMember = userGroupIds?.Contains(group.Id) ?? false;
+
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>@group.Name</h5>
+                        @if (!string.IsNullOrEmpty(group.Description))
+                        {
+                            <p class="text-muted">@group.Description</p>
+                        }
+                        <p class="small text-muted">@group.Members.Count medlem(mar)</p>
+
+                        @if (isMember)
+                        {
+                            <span class="badge bg-success">Du är medlem</span>
+                            <a asp-action="Read" asp-route-id="@group.Id" class="btn btn-sm btn-primary">Öppna</a>
+                        }
+                        else
+                        {
+                            <form asp-action="Join" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="groupId" value="@group.Id" />
+                                <button type="submit" class="btn btn-sm btn-success">Gå med</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">Inga grupper finns än. Skapa den första!</p>
+    }
+</div>

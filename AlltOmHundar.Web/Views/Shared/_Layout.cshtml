@@ -101,14 +101,7 @@
                 var isForumIndex = string.Equals(ctrl, "Forum", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(act, "Index", StringComparison.OrdinalIgnoreCase);
             }
-            @if (isForumIndex)
-            {
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a class="btn btn-primary" asp-controller="Group" asp-action="My">Öppna grupper</a>
-                    <a class="btn btn-outline-primary" asp-controller="Group" asp-action="My">Skapa grupp</a>
-                </div>
-            }
-
+            
             @RenderBody()
         </main>
     </div>

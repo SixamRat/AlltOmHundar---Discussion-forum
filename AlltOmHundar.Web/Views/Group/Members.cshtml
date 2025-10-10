@@ -1,0 +1,87 @@
+﻿@model AlltOmHundar.Core.Models.Group
+@{
+    ViewData["Title"] = "Gruppmedlemmar";
+    var allUsers = ViewBag.AllUsers as List<AlltOmHundar.Core.Models.User>;
+}
+
+<h2>@Model.Name - Medlemmar</h2>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-danger">@err</div>
+}
+@if (TempData["SuccessMessage"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<div class="mb-3">
+    <a asp-action="Read" asp-route-id="@Model.Id" class="btn btn-secondary">Tillbaka till chatten</a>
+    <a asp-action="My" class="btn btn-secondary">Mina grupper</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Nuvarande medlemmar (@Model.Members.Count)</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Members.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var member in Model.Members)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@member.User.Username</strong>
+                                    @if (member.UserId == Model.CreatedByUserId)
+                                    {
+                                        <span class="badge bg-primary ms-2">Ägare</span>
+                                    }
+                                </div>
+                                <small class="text-muted">Gick med @member.JoinedAt.ToString("yyyy-MM-dd")</small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Inga medlemmar.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Bjud in användare</h5>
+            </div>
+            <div class="card-body">
+                @if (allUsers != null && allUsers.Any())
+                {
+                    <p class="text-muted small">Välj en användare att bjuda in till gruppen:</p>
+                    <form asp-action="Invite" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="groupId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <select name="userId" class="form-select" required>
+                                <option value="">-- Välj användare --</option>
+                                @foreach (var user in allUsers)
+                                {
+                                    <option value="@user.Id">@user.Username</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Skicka inbjudan</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="text-muted">Alla användare är redan medlemmar i gruppen!</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

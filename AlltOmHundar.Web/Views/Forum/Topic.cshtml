@@ -1,49 +1,144 @@
 ﻿@model IEnumerable<AlltOmHundar.Core.Models.Post>
-
+@using AlltOmHundar.Web.Helpers
+@using AlltOmHundar.Core.Enums
 @{
-    ViewData["Title"] = "Tråd";
-    var topic = ViewBag.Topic;
+    ViewData["Title"] = "Diskussion";
+    var topic = ViewBag.Topic as AlltOmHundar.Core.Models.Topic;
+    var userId = SessionHelper.GetUserId(Context.Session);
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">@topic?.Title</h3>
-    <a class="btn btn-success"
-       asp-controller="Post" asp-action="CreatePost"
-       asp-route-topicId="@topic.Id">
-        Nytt inlägg (med bild)
-    </a>
-</div>
-
-@if (!string.IsNullOrWhiteSpace(topic?.Description))
+<h2>@topic?.Title</h2>
+@if (!string.IsNullOrEmpty(topic?.Description))
 {
     <p class="text-muted">@topic.Description</p>
 }
 
-@if (TempData["SuccessMessage"] is string ok)
+@* Skapa nytt inlägg *@
+@if (userId.HasValue)
 {
-    <div class="alert alert-success">@ok</div>
-}
-@if (TempData["ErrorMessage"] is string err)
-{
-    <div class="alert alert-danger">@err</div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Nytt inlägg</h5>
+            <form asp-controller="Post" asp-action="CreatePost" asp-route-topicId="@topic.Id" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <textarea name="Content" class="form-control mb-2" rows="3" placeholder="Skriv här..." required></textarea>
+                <input type="file" name="Image" class="form-control mb-2" accept=".jpg,.jpeg,.png,.gif" />
+                <button type="submit" class="btn btn-primary">Skapa inlägg</button>
+            </form>
+        </div>
+    </div>
 }
 
-@foreach (var post in Model ?? Enumerable.Empty<AlltOmHundar.Core.Models.Post>())
+@if (TempData["SuccessMessage"] is string success)
 {
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="small text-muted">
-                @post.CreatedAt.ToLocalTime():g — @post.User?.Username
-            </div>
-            <div class="mt-2">@post.Content</div>
+    <div class="alert alert-success">@success</div>
+}
+
+@* Inlägg *@
+@if (Model != null && Model.Any())
+{
+    @foreach (var post in Model)
+    {
+        var likeCount = post.Reactions?.Count(r => r.ReactionType == ReactionType.Like) ?? 0;
+        var userLiked = userId.HasValue && post.Reactions?.Any(r => r.UserId == userId.Value && r.ReactionType == ReactionType.Like) == true;
+
+        <div class="post-card mb-3">
+            <strong>@post.User?.Username</strong>
+            <span class="text-muted ms-2">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+
+            <p class="mt-2">@post.Content</p>
 
             @if (!string.IsNullOrEmpty(post.ImageUrl))
             {
-                <div class="mt-2">
-                    <img src="@post.ImageUrl" alt="Postbild" class="img-fluid rounded"
-                         style="max-height:380px;object-fit:contain;" />
+                <img src="@post.ImageUrl" alt="Bild" class="img-fluid mb-2" style="max-width: 500px;" />
+            }
+
+            <div class="d-flex gap-2 mb-2">
+                @if (userId.HasValue)
+                {
+                    <form asp-controller="Reaction" asp-action="AddReaction" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="postId" value="@post.Id" />
+                        <input type="hidden" name="topicId" value="@topic.Id" />
+                        <input type="hidden" name="reactionType" value="@((int)ReactionType.Like)" />
+                        <button type="submit" class="btn btn-sm @(userLiked ? "btn-primary" : "btn-outline-primary")">
+                            👍 Gilla (@likeCount)
+                        </button>
+                    </form>
+
+                    <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('reply-@post.Id').style.display='block'">
+                        💬 Svara
+                    </button>
+
+                    <a class="btn btn-sm btn-outline-warning" asp-controller="Report" asp-action="Create"
+                       asp-route-postId="@post.Id" asp-route-topicId="@topic.Id">
+                        ⚠️ Anmäl
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">👍 @likeCount gillningar</span>
+                }
+            </div>
+
+            @* Svarsfält (dolt tills användaren klickar "Svara") *@
+            @if (userId.HasValue)
+            {
+                <div id="reply-@post.Id" style="display:none;" class="mt-2 p-2 bg-light">
+                    <form asp-controller="Post" asp-action="CreatePost" asp-route-topicId="@topic.Id" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ParentPostId" value="@post.Id" />
+                        <textarea name="Content" class="form-control mb-2" rows="2" required></textarea>
+                        <input type="file" name="Image" class="form-control mb-2" accept=".jpg,.jpeg,.png,.gif" />
+                        <button type="submit" class="btn btn-sm btn-primary">Skicka svar</button>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('reply-@post.Id').style.display='none'">Avbryt</button>
+                    </form>
+                </div>
+            }
+
+            @* Visa svar *@
+            @if (post.Replies != null && post.Replies.Any())
+            {
+                <div class="ms-4 mt-3 border-start ps-3">
+                    @foreach (var reply in post.Replies.OrderBy(r => r.CreatedAt))
+                    {
+                        var replyLikes = reply.Reactions?.Count(r => r.ReactionType == ReactionType.Like) ?? 0;
+
+                        <div class="mb-2">
+                            <strong>@reply.User?.Username</strong>
+                            <span class="text-muted ms-2 small">@reply.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                            <p class="mb-1">@reply.Content</p>
+
+                            @if (!string.IsNullOrEmpty(reply.ImageUrl))
+                            {
+                                <img src="@reply.ImageUrl" alt="Bild" class="img-fluid mb-1" style="max-width: 400px;" />
+                            }
+
+                            @if (userId.HasValue)
+                            {
+                                var userLikedReply = reply.Reactions?.Any(r => r.UserId == userId.Value && r.ReactionType == ReactionType.Like) == true;
+                                <form asp-controller="Reaction" asp-action="AddReaction" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="postId" value="@reply.Id" />
+                                    <input type="hidden" name="topicId" value="@topic.Id" />
+                                    <input type="hidden" name="reactionType" value="@((int)ReactionType.Like)" />
+                                    <button type="submit" class="btn btn-sm @(userLikedReply ? "btn-primary" : "btn-outline-primary")">
+                                        👍 @replyLikes
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">👍 @replyLikes</span>
+                            }
+                        </div>
+                    }
                 </div>
             }
         </div>
-    </div>
+    }
+}
+else
+{
+    <div class="alert alert-info">Inga inlägg ännu.</div>
 }
